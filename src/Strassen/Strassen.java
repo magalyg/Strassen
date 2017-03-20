@@ -21,7 +21,7 @@ public class Strassen {
         int number_ints = 2*sz*sz;
         for(int i=0; i<number_ints; i++) {
             Random rand = new Random();
-            int n = rand.nextInt(10) + 1;
+            int n = rand.nextInt(5) + 1;
             tofile.write(n + "\n");
         }
         tofile.close();
@@ -80,7 +80,7 @@ public class Strassen {
         int[][] C = new int [sz][sz];
         for(int i=0; i<sz; i++){
             for(int j=0; j<sz; j++){
-                C[i][j]= A[i][j] + B[i][j];
+                C[i][j]= A[i][j] - B[i][j];
             }
         }
         return C;
@@ -92,7 +92,27 @@ public class Strassen {
         int[][] blockC = new int[sz/2][sz/2];
         int[][] blockD = new int[sz/2][sz/2];
 
+        for(int i = 0; i<sz/2; i++){
+            for(int j=0;j<sz/2; j++){
+                blockA[i][j] = matrix[i][j];
+            }
+        }
 
+        for(int i = 0; i<sz/2; i++){
+            for(int j=sz/2;j<sz; j++){
+                blockB[i][j-sz/2] = matrix[i][j];
+            }
+        }
+        for(int i = sz/2; i<sz; i++){
+            for(int j=0;j<sz/2; j++){
+                blockC[i-sz/2][j] = matrix[i][j];
+            }
+        }
+        for(int i = sz/2; i<sz; i++){
+            for(int j=sz/2;j<sz; j++){
+                blockD[i-sz/2][j-sz/2] = matrix[i][j];
+            }
+        }
 
         ArrayList<int [][]> blocks = new ArrayList<>();
         blocks.add(0,blockA);
@@ -103,13 +123,74 @@ public class Strassen {
     }
     //Strassen method to multiply two matrices
     public static int[][] strassen_multiply(int[][] A, int [][] B, int sz){
-        //handle if sz is not even
+        int [][] D = new int[sz][sz];
+        /*handle if sz is not even
+        */
+        //handle base case/ this can change when we fix the even size
+        if(sz==1){
+            D[0][0] = A[0][0]*B[0][0];
+        }
+        else {
+            //Divide the matrices into two
+            ArrayList<int[][]> blocksA = matrix_divide(A, sz);
+            int[][] blockAa = blocksA.get(0);
+            int[][] blockAb = blocksA.get(1);
+            int[][] blockAc = blocksA.get(2);
+            int[][] blockAd = blocksA.get(3);
 
+            ArrayList<int[][]> blocksB = matrix_divide(B, sz);
+            int[][] blockBa = blocksB.get(0);
+            int[][] blockBb = blocksB.get(1);
+            int[][] blockBc = blocksB.get(2);
+            int[][] blockBd = blocksB.get(3);
 
-        int [][] C = new int[sz][sz];
-        return C;
+            //store the multiplication results and
+            int[][] block_mult1 = strassen_multiply(add(blockAa, blockAd, sz / 2), add(blockBa, blockBd, sz / 2), sz / 2);
+            int[][] block_mult2 = strassen_multiply(add(blockAc, blockAd, sz / 2), blockBa, sz / 2);
+            int[][] block_mult3 = strassen_multiply(blockAa, subtract(blockBb, blockBd, sz / 2), sz / 2);
+            int[][] block_mult4 = strassen_multiply(blockAd, subtract(blockBc, blockBa, sz / 2), sz / 2);
+            int[][] block_mult5 = strassen_multiply(add(blockAa, blockAb, sz / 2), blockBd, sz / 2);
+            int[][] block_mult6 = strassen_multiply(subtract(blockAc, blockAa, sz / 2), add(blockBa, blockBb, sz / 2), sz / 2);
+            int[][] block_mult7 = strassen_multiply(subtract(blockAb, blockAd, sz / 2), add(blockBc, blockBd, sz / 2), sz / 2);
+
+            //Construct D blocks
+            int[][] blockDa = add(subtract(add(block_mult1,block_mult4,sz/2),block_mult5,sz/2),block_mult7,sz/2);
+            int[][] blockDb = add(block_mult3, block_mult5, sz / 2);
+            int[][] blockDc = add(block_mult2, block_mult4, sz / 2);
+            int[][] blockDd = add(subtract(add(block_mult1,block_mult3,sz/2),block_mult2,sz/2),block_mult6,sz/2);
+            //place the blocks back together into D
+            for (int i = 0; i < sz / 2; i++) {
+                for (int j = 0; j < sz / 2; j++) {
+                    D[i][j] = blockDa[i][j];
+                }
+            }
+
+            for (int i = 0; i < sz / 2; i++) {
+                for (int j = sz / 2; j < sz; j++) {
+                    D[i][j] = blockDb[i][j - sz / 2];
+                }
+            }
+            for (int i = sz / 2; i < sz; i++) {
+                for (int j = 0; j < sz / 2; j++) {
+                    D[i][j] = blockDc[i - sz / 2][j];
+                }
+            }
+            for (int i = sz / 2; i < sz; i++) {
+                for (int j = sz / 2; j < sz; j++) {
+                    D[i][j] = blockDd[i - sz / 2][j - sz / 2];
+                }
+            }
+        }
+        return D;
     }
-
+    public static void print_block(int[][] D, int sz){
+        for(int i = 0; i<sz; i++){
+            for(int j =0; j<sz; j++){
+                System.out.printf(" %d",D[i][j]);
+            }
+            System.out.print("\n");
+        }
+    }
     public static void main(String[] args) throws FileNotFoundException {
         //Revise number of arguments
 
@@ -129,11 +210,20 @@ public class Strassen {
         int[][] matrix_B = matrices.get(1);
         //Regular matrix multiplication
         int [][] matrix_C = regular_multiply(matrix_A, matrix_B, sz);
-
+        int [][] matrix_D = strassen_multiply(matrix_A,matrix_B,sz);
         //Print Matrix for debugging purposes
+        System.out.println("Regular matrix result matrix result");
         for(int i = 0; i<sz; i++){
             for(int j =0; j<sz; j++){
                 System.out.printf(" %d",matrix_C[i][j]);
+            }
+            System.out.print("\n");
+        }
+        //Print Matrix for debugging purposes
+        System.out.println("Strassen matrix result");
+        for(int i = 0; i<sz; i++){
+            for(int j =0; j<sz; j++){
+                System.out.printf(" %d",matrix_D[i][j]);
             }
             System.out.print("\n");
         }
