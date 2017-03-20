@@ -26,6 +26,8 @@ public class Strassen {
         }
         tofile.close();
     }
+
+
     //method to generate matrices from file
     public static ArrayList<int [][]> fileToMatrices(String file, int sz) throws FileNotFoundException {
         int [][] A = new int [sz][sz];
@@ -85,6 +87,29 @@ public class Strassen {
         }
         return C;
     }
+    //to add zeros to handle odd numbers
+    public  static int[][] addZeroes(int [][] matrix, int sz){
+        int [][] newMatrix = new int[sz+1][sz+1];
+        //matrix is automatically initialize with zeroes so we only have to move the things from smaller matrix
+        for(int i = 0; i<sz; i++){
+            for(int j = 0; j<sz; j++){
+                newMatrix[i][j] = matrix[i][j];
+            }
+        }
+        return  newMatrix;
+    }
+
+    public  static int[][] removeZeroes(int [][] even_matrix, int sz){
+        int [][] odd_matrix = new int[sz+1][sz+1];
+        //matrix is automatically initialize with zeroes so we only have to move the things from smaller matrix
+        for(int i = 0; i<sz; i++){
+            for(int j = 0; j<sz; j++){
+                odd_matrix[i][j] = even_matrix[i][j];
+            }
+        }
+        return  odd_matrix;
+    }
+
     //Method to divide a matrix into four blocks
     public static ArrayList<int[][]> matrix_divide(int[][] matrix, int sz){
         int[][] blockA = new int[sz/2][sz/2];
