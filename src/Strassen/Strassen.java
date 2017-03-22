@@ -1,4 +1,4 @@
-package Strassen;
+//package Strassen;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.Random;
@@ -100,10 +100,10 @@ public class Strassen {
     }
 
     public  static int[][] removeZeroes(int [][] even_matrix, int sz){
-        int [][] odd_matrix = new int[sz+1][sz+1];
+        int [][] odd_matrix = new int[sz-1][sz-1];
         //matrix is automatically initialize with zeroes so we only have to move the things from smaller matrix
-        for(int i = 0; i<sz; i++){
-            for(int j = 0; j<sz; j++){
+        for(int i = 0; i<sz-1; i++){
+            for(int j = 0; j<sz-1; j++){
                 odd_matrix[i][j] = even_matrix[i][j];
             }
         }
@@ -218,41 +218,53 @@ public class Strassen {
     }
     public static void main(String[] args) throws FileNotFoundException {
         //Revise number of arguments
-
         if (args.length != 3) {
             System.out.println("Invalid number of arguments (./strassen 0 dimension filename)");
             return;
         }
         //Get argument values
+        final Integer type = Integer.valueOf(args[FREE_VAR]);
         final Integer sz = Integer.valueOf(args[DIMENSION]);
         final String filename = args[NAME_FILE];
         //just making sure string holds name of file
         System.out.println(filename);
         ints_to_file(sz,filename);
 
-        ArrayList<int[][]> matrices = fileToMatrices(filename, sz);
-        int[][] matrix_A = matrices.get(0);
-        int[][] matrix_B = matrices.get(1);
-        //Regular matrix multiplication
-        int [][] matrix_C = regular_multiply(matrix_A, matrix_B, sz);
-        int [][] matrix_D = strassen_multiply(matrix_A,matrix_B,sz);
-        //Print Matrix for debugging purposes
-        System.out.println("Regular matrix result matrix result");
-        for(int i = 0; i<sz; i++){
-            for(int j =0; j<sz; j++){
-                System.out.printf(" %d",matrix_C[i][j]);
-            }
-            System.out.print("\n");
+        switch(type){
+            case 1 :
+                ArrayList<int[][]> matrices = fileToMatrices(filename, sz);
+                int[][] matrix_A = matrices.get(0);
+                int[][] matrix_B = matrices.get(1);
+                //Regular matrix multiplication with timings
+                long start1 = System.nanoTime();
+                int [][] matrix_C = regular_multiply(matrix_A, matrix_B, sz);
+                long end1 = System.nanoTime();
+                System.out.printf("Time for regular multiplication (nanoseconds): %d%n\n", (end1-start1));
+                //Strassen matrix multiply with timings
+                long start2 = System.nanoTime();
+                int [][] matrix_D = strassen_multiply(matrix_A,matrix_B,sz);
+                long end2 = System.nanoTime();
+                System.out.printf("Time for Strassen multiplication (nanoseconds): %d%n\n", (end2-start2));
+                //Print Matrix for debugging purposes
+                /*System.out.println("Regular matrix result");
+                for(int i = 0; i<sz; i++){
+                    for(int j =0; j<sz; j++){
+                        System.out.printf(" %d",matrix_C[i][j]);
+                    }
+                    System.out.print("\n");
+                }
+                //Print Matrix for debugging purposes
+                System.out.println("Strassen matrix result");
+                for(int i = 0; i<sz; i++){
+                    for(int j =0; j<sz; j++){
+                        System.out.printf(" %d",matrix_D[i][j]);
+                    }
+                    System.out.print("\n");
+                }*/
+                break;
+            default : 
+                System.out.println("Not yet implemented.");
         }
-        //Print Matrix for debugging purposes
-        System.out.println("Strassen matrix result");
-        for(int i = 0; i<sz; i++){
-            for(int j =0; j<sz; j++){
-                System.out.printf(" %d",matrix_D[i][j]);
-            }
-            System.out.print("\n");
-        }
-
 
     }
 }
