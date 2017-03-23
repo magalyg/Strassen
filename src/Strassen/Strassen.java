@@ -53,6 +53,13 @@ public class Strassen {
 
         return matrices;
     }
+    //method to print the diagonal of a matrix;
+    public static void  print_matrix_diagonal(int [][] A, int sz){
+
+        for(int i =0; i<sz; i++){
+            System.out.printf("%d, ", A[i][i]);
+        }
+    }
     //Method to mutiply two matrices
     public static int[][] regular_multiply(int[][] A, int [][] B, int sz){
         int [][] C = new int[sz][sz];
@@ -109,7 +116,16 @@ public class Strassen {
         }
         return  odd_matrix;
     }
-
+    //new matrix divide
+    public static int[][] matrix_divider(int [][] matrix, int sz, int row_start, int column_start){
+        int[][] matrix_block= new int[sz/2][sz/2];
+        for(int i = 0; i<sz/2; i++){
+            for(int j=0;j<sz/2; j++){
+                matrix_block[i][j] = matrix[i+row_start][j+column_start];
+            }
+        }
+        return  matrix_block;
+    }
     //Method to divide a matrix into four blocks
     public static ArrayList<int[][]> matrix_divide(int[][] matrix, int sz){
         int[][] blockA = new int[sz/2][sz/2];
@@ -156,18 +172,28 @@ public class Strassen {
             D[0][0] = A[0][0]*B[0][0];
         }
         else {
-            //Divide the matrices into two
-            ArrayList<int[][]> blocksA = matrix_divide(A, sz);
-            int[][] blockAa = blocksA.get(0);
-            int[][] blockAb = blocksA.get(1);
-            int[][] blockAc = blocksA.get(2);
-            int[][] blockAd = blocksA.get(3);
 
-            ArrayList<int[][]> blocksB = matrix_divide(B, sz);
-            int[][] blockBa = blocksB.get(0);
-            int[][] blockBb = blocksB.get(1);
-            int[][] blockBc = blocksB.get(2);
-            int[][] blockBd = blocksB.get(3);
+            //Divide the matrices into two
+            //ArrayList<int[][]> blocksA = matrix_divide(A, sz);
+//            int[][] blockAa = blocksA.get(0);
+//            int[][] blockAb = blocksA.get(1);
+//            int[][] blockAc = blocksA.get(2);
+//            int[][] blockAd = blocksA.get(3);
+
+            int[][] blockAa = matrix_divider(A,sz, 0, 0);
+            int[][] blockAb = matrix_divider(A,sz, 0, sz/2);
+            int[][] blockAc = matrix_divider(A,sz, sz/2, 0);
+            int[][] blockAd = matrix_divider(A,sz, sz/2, sz/2);
+
+//            ArrayList<int[][]> blocksB = matrix_divide(B, sz);
+//            int[][] blockBa = blocksB.get(0);
+//            int[][] blockBb = blocksB.get(1);
+//            int[][] blockBc = blocksB.get(2);
+//            int[][] blockBd = blocksB.get(3);
+            int[][] blockBa = matrix_divider(B,sz, 0, 0);
+            int[][] blockBb = matrix_divider(B,sz, 0, sz/2);
+            int[][] blockBc = matrix_divider(B,sz, sz/2, 0);
+            int[][] blockBd = matrix_divider(B,sz, sz/2, sz/2);
 
             //store the multiplication results and
             int[][] block_mult1 = strassen_multiply(add(blockAa, blockAd, sz / 2), add(blockBa, blockBd, sz / 2), sz / 2);
@@ -184,6 +210,7 @@ public class Strassen {
             int[][] blockDc = add(block_mult2, block_mult4, sz / 2);
             int[][] blockDd = add(subtract(add(block_mult1,block_mult3,sz/2),block_mult2,sz/2),block_mult6,sz/2);
             //place the blocks back together into D
+
             for (int i = 0; i < sz / 2; i++) {
                 for (int j = 0; j < sz / 2; j++) {
                     D[i][j] = blockDa[i][j];
@@ -206,6 +233,7 @@ public class Strassen {
                 }
             }
         }
+
         return D;
     }
     public static void print_block(int[][] D, int sz){
@@ -234,25 +262,32 @@ public class Strassen {
         int[][] matrix_A = matrices.get(0);
         int[][] matrix_B = matrices.get(1);
         //Regular matrix multiplication
+        long start_time_regular =  System.nanoTime();
         int [][] matrix_C = regular_multiply(matrix_A, matrix_B, sz);
+        long end_time_regular =  System.nanoTime();
+        long start_time_strassen = System.nanoTime();
         int [][] matrix_D = strassen_multiply(matrix_A,matrix_B,sz);
+        long end_time_strassen = System.nanoTime();
         //Print Matrix for debugging purposes
         System.out.println("Regular matrix result matrix result");
-        for(int i = 0; i<sz; i++){
-            for(int j =0; j<sz; j++){
-                System.out.printf(" %d",matrix_C[i][j]);
-            }
-            System.out.print("\n");
-        }
+//        for(int i = 0; i<sz; i++){
+//            for(int j =0; j<sz; j++){
+//                System.out.printf(" %d",matrix_C[i][j]);
+//            }
+//            System.out.print("\n");
+//        }
+        print_matrix_diagonal(matrix_C,sz);
+        System.out.printf("Time regular multiplication %f \n",  (end_time_regular-start_time_regular)/1000000000.0);
         //Print Matrix for debugging purposes
         System.out.println("Strassen matrix result");
-        for(int i = 0; i<sz; i++){
-            for(int j =0; j<sz; j++){
-                System.out.printf(" %d",matrix_D[i][j]);
-            }
-            System.out.print("\n");
-        }
-
+//        for(int i = 0; i<sz; i++){
+//            for(int j =0; j<sz; j++){
+//                System.out.printf(" %d",matrix_D[i][j]);
+//            }
+//            System.out.print("\n");
+//        }
+        print_matrix_diagonal(matrix_D,sz);
+        System.out.printf("Time Strassen multiplication %f \n",  (end_time_strassen-start_time_strassen)/1000000000.0);
 
     }
 }

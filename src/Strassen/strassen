@@ -1,0 +1,4 @@
+#!/bin/bash
+# Run the following line manually and comment it out if necessary
+javac -d . Strassen.java
+java -d64 -Xmx16g com/cs124/Main $1 $2 $3 $4
