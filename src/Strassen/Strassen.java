@@ -60,7 +60,6 @@ public class Strassen {
     //Method to multiply two matrices
     public static int[][] regular_multiply(int[][] A, int [][] B, int sz){
         int [][] C = new int[sz][sz];
-
         for(int i= 0; i<sz; i++){
             for(int j=0; j<sz; j++){
                 for (int k=0; k<sz; k++) {
@@ -214,7 +213,7 @@ public class Strassen {
     //returns an array of X numbers between 1 and sz for testing
     public static int[] testing_array(int num_tests, int max_num){
         int [] test = new int[num_tests];
-        test[0] = 1;
+        test[0] = 2;
         test[num_tests-1] = max_num;
         int factor = (int)Math.floor(max_num/num_tests);
         for(int i =1; i<num_tests-1; i++){
@@ -232,44 +231,35 @@ public class Strassen {
         //Get argument values
         final Integer sz = Integer.valueOf(args[DIMENSION]);
         final String filename = args[NAME_FILE];
-        ints_to_file(sz,filename);
-        ArrayList<int[][]> matrices = fileToMatrices(filename, sz);
-        int[][] matrix_A = matrices.get(0);
-        int[][] matrix_B = matrices.get(1);
-        //generate an array of X sizes for testing
 
+        //generate an array of X sizes for testing
         int [] arrray_test = testing_array(10,sz);
-        //Regular matrix multiplication
-        long start_time_regular =  System.nanoTime();
-        int [][] matrix_C = regular_multiply(matrix_A, matrix_B, sz);
-        long end_time_regular =  System.nanoTime();
-        double regular_time = (end_time_regular-start_time_regular)/1000000000.0;
-        System.out.println("Regular matrix result matrix result");
-        System.out.printf("Time regular multiplication %f \n",regular_time );
-        //testing for strassen
-        double time_strassen = Double.MAX_VALUE;
-        int i=1;
-        int[][] matrix_D;
-        while (time_strassen>regular_time) {
-            long start_time_strassen = System.nanoTime();
-            matrix_D = strassen_all(matrix_A, matrix_B, sz, i);
-            long end_time_strassen = System.nanoTime();
-//            print_matrix_diagonal(matrix_D,sz);
-            time_strassen =(end_time_strassen-start_time_strassen)/1000000000.0;
-            System.out.printf("Time Strassen multiplication %d %f \n", i,
-                    time_strassen);
-            i++;
+        for(int j=0; j<arrray_test.length; j++){
+            ints_to_file(arrray_test[j],filename);
+            ArrayList<int[][]> matrices = fileToMatrices(filename, arrray_test[j]);
+            int[][] matrix_A = matrices.get(0);
+            int[][] matrix_B = matrices.get(1);
+            System.out.printf("For size %d \n", arrray_test[j]);
+            //Regular matrix multiplication
+            long start_time_regular =  System.nanoTime();
+            int [][] matrix_C = regular_multiply(matrix_A, matrix_B, arrray_test[j]);
+            long end_time_regular =  System.nanoTime();
+            double regular_time = (end_time_regular-start_time_regular)/1000000000.0;
+            System.out.printf("Time regular multiplication %f \n",regular_time );
+            System.out.printf("%-15s %-15s \n","Strassen n0","Time");
+            double time_strassen = Double.MAX_VALUE;
+            int i=1;
+            int[][] matrix_D;
+            while (time_strassen>regular_time && i<arrray_test[j]) {
+                long start_time_strassen = System.nanoTime();
+                matrix_D = strassen_all(matrix_A, matrix_B, arrray_test[j], i);
+                long end_time_strassen = System.nanoTime();
+                time_strassen =(end_time_strassen-start_time_strassen)/1000000000.0;
+                System.out.printf("%-15d %-15f \n", i,
+                        time_strassen);
+                i++;
+            }
         }
-        System.out.printf("Time Strassen multiplication %d %f \n", i,
-                time_strassen);
-        //Print Matrix for debugging purposes
-        System.out.println("Regular matrix result matrix result");
-       // print_matrix_diagonal(matrix_C,sz);
-        System.out.printf("Time regular multiplication %f \n",  (end_time_regular-start_time_regular)/1000000000.0);
-        //Print Matrix for debugging purposes
-        System.out.println("Strassen matrix result");
-//        print_matrix_diagonal(matrix_D,sz);
-//        System.out.printf("Time Strassen multiplication %f \n",  (end_time_strassen-start_time_strassen)/1000000000.0);
 
     }
 }
